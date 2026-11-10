@@ -1,268 +1,184 @@
 <!DOCTYPE html>
 <html lang="ko">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>DUNGEON: DESCENT</title>
-
-    <link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#100b1d">
+  <title>DUNGEON: DESCENT</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
-
 <body>
-
-    <!-- 메인 메뉴: 시작 버튼을 눌러야 게임이 진행됩니다 -->
-    <div id="mainMenuOverlay" class="screen-overlay">
-        <div class="screen-box">
-            <h1>⚔ DUNGEON: DESCENT</h1>
-            <p>깊은 던전으로 내려가 살아남으세요.</p>
-            <div class="menu-section-title">CHARACTER SELECT</div>
-            <div id="characterSelection" class="character-selection"></div>
-            <p id="selectedCharacterInfo" class="selected-character-info">캐릭터를 선택하세요.</p>
-            <div class="main-menu-actions">
-                <button onclick="startGame()">던전 입장</button>
-                <button class="secondary-menu-button" onclick="openMetaMenu()">영구 강화 / 기록</button>
-                <button class="secondary-menu-button" onclick="openCodexMenu()">도감 / 업적</button>
-            </div>
-            <p id="mainMenuRecord" class="screen-hint">최고 기록을 불러오는 중...</p>
-            <p class="screen-hint">테스트 빌드 · WASD 이동 · 방향키 공격 · ESC 일시정지</p>
+  <div class="app-shell">
+    <!-- LEFT HUD -->
+    <aside class="left-rail">
+      <section class="panel hero-panel">
+        <div class="hero-topline"><span class="eyebrow">DUNGEON EXPLORER</span><span class="live-dot"></span></div>
+        <div class="hero-identity">
+          <div class="portrait-frame"><img id="heroPortrait" src="images/characters/knight.png" alt="선택 캐릭터"></div>
+          <div class="hero-name-wrap"><strong id="heroName">기사단장 아렌</strong><span id="level">Lv. 1</span></div>
         </div>
-    </div>
+        <div class="heart-row" id="heartDisplay" aria-label="체력"></div>
+        <div class="meter-label"><span>VITALITY</span><strong id="hpBarText">120 / 120</strong></div>
+        <div id="hpBarWrap" class="meter hp-meter"><div id="hpBarFill"></div></div>
+        <div class="meter-label xp-label"><span>EXPERIENCE</span><span id="xpBarText">0 / 30 XP</span></div>
+        <div id="xpBarWrap" class="meter xp-meter"><div id="xpBarFill"></div></div>
+      </section>
 
-    <!-- 영구 강화 / 기록 메뉴 -->
-    <div id="metaOverlay" class="screen-overlay meta-overlay" style="display:none;">
-        <div class="screen-box meta-box">
-            <h1>✦ 영혼의 기록</h1>
-            <p>탐험에서 모은 영혼 파편으로 영구적인 힘을 개방하세요.</p>
-            <div id="metaSummary" class="meta-summary"></div>
-            <div id="metaUpgrades" class="meta-upgrades"></div>
-            <div id="metaUnlocks" class="meta-unlocks"></div>
-            <button class="secondary-menu-button" onclick="closeMetaMenu()">돌아가기</button>
-        </div>
-    </div>
+      <aside id="playerStatsPanel" class="panel stats-panel">
+        <div class="panel-heading"><span class="heading-mark">✦</span><h2>전투 능력치</h2><span class="panel-subtitle">STATUS</span></div>
+        <div class="stat-row"><span><i>⚔</i> 공격력</span><strong id="statDamage">25</strong></div>
+        <div class="stat-row"><span><i>🛡</i> 방어력</span><strong id="statDefense">2</strong></div>
+        <div class="stat-row"><span><i>➶</i> 공격 속도</span><strong id="statAttackSpeed">100%</strong></div>
+        <div class="stat-row"><span><i>👟</i> 이동 속도</span><strong id="statSpeed">2.90</strong></div>
+        <div class="stat-row"><span><i>✧</i> 공격 범위</span><strong id="statRange">90</strong></div>
+        <div class="stat-row"><span><i>♡</i> 치명타 확률</span><strong id="statCritChance">3%</strong></div>
+        <div class="stat-row"><span><i>♥</i> 최대 체력</span><strong id="statMaxHp">120</strong></div>
+        <div class="stat-row"><span><i>✹</i> 최종 대미지</span><strong id="statFinalDamage">100%</strong></div>
+      </aside>
 
-    <!-- 도감 / 업적 메뉴 -->
-    <div id="codexOverlay" class="screen-overlay codex-overlay" style="display:none;">
-        <div class="screen-box codex-box">
-            <h1>📖 탐험가의 도감</h1>
-            <p>던전에서 발견한 유물과 마주친 적, 달성한 업적을 기록합니다.</p>
-            <div id="codexContent" class="codex-content"></div>
-            <button class="secondary-menu-button" onclick="closeCodexMenu()">돌아가기</button>
-        </div>
-    </div>
-
-    <!-- 일시정지 메뉴 -->
-    <div id="pauseOverlay" class="screen-overlay" style="display:none;">
-        <div class="screen-box">
-            <h1>⏸ 일시정지</h1>
-            <p>게임이 일시정지되었습니다.</p>
-            <div class="pause-actions">
-                <button onclick="resumeGame()">계속하기</button>
-                <button class="secondary-menu-button" onclick="returnToMainMenu()">메인 메뉴로 돌아가기</button>
-            </div>
-            <p class="screen-hint">ESC를 눌러 계속하기</p>
-        </div>
-    </div>
-
-    <!-- 왼쪽 유물 인벤토리 -->
-    <aside id="relicInventoryPanel">
-        <h2>RELICS</h2>
-        <div id="relicInventory">
-            <div class="relic-empty">보유한 유물이 없습니다.</div>
-        </div>
+      <section id="relicInventoryPanel" class="panel relic-panel">
+        <div class="panel-heading"><span class="heading-mark">◇</span><h2>보유 유물</h2><span class="panel-subtitle" id="relicCount">0 / 28</span></div>
+        <div id="relicInventory"><div class="relic-empty">아직 발견한 유물이 없습니다.</div></div>
+      </section>
+      <div class="left-footnote"><span>✦</span> 유물 조합으로 새로운 힘을 발견하세요.</div>
     </aside>
 
+    <!-- CENTER GAME -->
+    <main id="gameContainer" class="center-stage">
+      <header class="stage-header">
+        <div class="brand-lockup"><span class="brand-emblem">⚔</span><div><strong>DUNGEON <em>:</em> DESCENT</strong><small>THE DEPTHS ARE CALLING</small></div></div>
+        <div id="info" class="top-info">
+          <span id="floor">지하 1층</span>
+          <span id="biomeName" class="biome-name">망자의 묘역</span>
+          <span id="gold">🪙 0</span>
+          <span id="kills">☠ 0</span>
+        </div>
+      </header>
 
-    <!-- 오른쪽 플레이어 스탯 패널 -->
-    <aside id="playerStatsPanel">
-        <h2>PLAYER</h2>
-        <div class="stat-row"><span>최대 체력</span><strong id="statMaxHp">100</strong></div>
-        <div class="stat-row"><span>대미지</span><strong id="statDamage">10</strong></div>
-        <div class="stat-row"><span>공격 속도</span><strong id="statAttackSpeed">100%</strong></div>
-        <div class="stat-row"><span>이동 속도</span><strong id="statSpeed">2.5</strong></div>
-        <div class="stat-row"><span>공격 범위</span><strong id="statRange">90</strong></div>
-        <div class="stat-row"><span>방어력</span><strong id="statDefense">0</strong></div>
-        <div class="stat-row"><span>치명타 확률</span><strong id="statCritChance">0%</strong></div>
-        <div class="stat-row"><span>최종 대미지</span><strong id="statFinalDamage">100%</strong></div>
-    </aside>
-
-    <div id="gameContainer">
-
-        <!-- 다음 층 카운트다운 -->
+      <div class="arena-frame">
+        <div class="arena-corner corner-tl"></div><div class="arena-corner corner-tr"></div>
+        <div class="arena-corner corner-bl"></div><div class="arena-corner corner-br"></div>
         <div id="floorCountdown" class="floor-countdown">
-            <div class="countdown-message">
-                <span id="countdownText">5초 뒤 다음 층으로 넘어갑니다</span>
-                <span id="countdownNumber">5</span>
-            </div>
-
-            <div class="countdown-bar">
-                <div id="countdownProgress" class="countdown-progress"></div>
-            </div>
+          <div class="countdown-message"><span id="countdownText">5초 뒤 다음 층으로 넘어갑니다</span><strong id="countdownNumber">5</strong></div>
+          <div class="countdown-bar"><div id="countdownProgress" class="countdown-progress"></div></div>
         </div>
+        <canvas id="game" width="800" height="500" aria-label="던전 전투 화면"></canvas>
 
-        <h1>⚔ DUNGEON: DESCENT</h1>
-
-        <div id="info">
-
-            <div id="hpBarWrap" aria-label="플레이어 체력">
-                <div id="hpBarFill"></div>
-                <span id="hpBarText">100 / 100</span>
-            </div>
-
-            <span id="floor">
-                🏰 Floor: 1
-            </span>
-            <span id="biomeName" class="biome-name">망자의 묘역</span>
-
-            <span id="gold">
-                💰 Gold: 0
-            </span>
-
-            <div id="xpBarWrap" aria-label="경험치">
-                <div id="xpBarFill"></div>
-                <span id="xpBarText">0 / 30 XP</span>
-            </div>
-            <span id="level">⭐ Lv. 1</span>
-            <span id="kills">
-                ☠ Kills: 0
-            </span>
-
-        </div>
-
-        <!-- 효과음 볼륨 조절 -->
-        <div id="soundControl">
-            <label for="soundVolume">🔊 효과음</label>
-            <input id="soundVolume" type="range" min="0" max="100" value="50"
-                   oninput="setSoundVolume(this.value)">
-            <span id="soundVolumeValue">50%</span>
-        </div>
-
-        <canvas id="game" width="800" height="500"></canvas>
-
-        <!-- 능력 선택창 -->
-
+        <!-- EVENT -->
         <div id="eventOverlay" class="event-overlay">
-            <div class="event-box">
-                <h2>✦ 수상한 기운이 감돕니다</h2>
-                <p>이번 방에서 어떤 선택을 하시겠습니까?</p>
-                <div id="eventChoices" class="event-choices"></div>
-            </div>
+          <div class="event-box"><div class="event-crest">✧</div><h2>✦ 수상한 기운이 감돕니다</h2><p>이번 방에서 어떤 선택을 하시겠습니까?</p><div id="eventChoices" class="event-choices"></div></div>
         </div>
 
+        <!-- LEVEL / RELIC CHOICE -->
         <div id="abilityOverlay" class="ability-overlay">
-
-            <div class="ability-box">
-
-                <h2>✨ 능력을 선택하세요</h2>
-
-                <p>
-                    다음 층으로 가기 전에 하나를 선택할 수 있습니다.
-                </p>
-
-                <div id="abilityChoices" class="ability-choices">
-                    <!-- JavaScript에서 능력 카드 생성 -->
-                </div>
-
-            </div>
-
+          <div class="ability-box"><div class="modal-kicker">RELIC ACQUISITION</div><h2>✨ 유물을 선택하세요</h2><p>던전에서 발견한 힘을 하나 선택하세요.</p><div id="abilityChoices" class="ability-choices"></div></div>
         </div>
 
-
-        <!-- 상점 -->
-
+        <!-- SHOP -->
         <div id="shopOverlay" class="shop-overlay">
-
-            <div class="shop-box">
-
-                <h2>🛒 DESCENT SHOP</h2>
-
-                <p>
-                    필요한 아이템을 구매하세요.
-                </p>
-
-                <div class="shop-status">
-
-                    <span id="shopGold">
-                        💰 Gold: 0
-                    </span>
-
-
-                </div>
-
-
-                <div id="shopItems" class="shop-items">
-                    <!-- JavaScript에서 상품 카드 생성 -->
-                </div>
-
-                <div class="shop-services">
-                    <button id="shopRerollButton" type="button">재고 새로고침</button>
-                    <button id="shopRelicButton" type="button">유물 감정</button>
-                </div>
-
-                <p id="shopMessage" class="shop-message"></p>
-
-
-                <button id="nextFloorButton" class="next-floor-button">
-                    다음 층으로 ➜
-                </button>
-
+          <div class="shop-box">
+            <div class="merchant-header">
+              <div class="merchant-art"><span class="merchant-eye left-eye"></span><span class="merchant-eye right-eye"></span><span class="merchant-lantern">♨</span></div>
+              <div class="merchant-copy"><div class="modal-kicker">A STRANGE ENCOUNTER</div><h2>수상한 상인</h2><p>……여기, 괜찮은 물건이 있어요.<br>뭘 원하는지 천천히 살펴보세요.</p></div>
             </div>
-
+            <div class="shop-status"><span id="shopGold">🪙 Gold: 0</span><span class="shop-limit-note">한 번의 방문에서 최대 3회 구매 가능</span></div>
+            <div id="shopItems" class="shop-items"></div>
+            <div class="shop-services"><button id="shopRerollButton" type="button">재고 새로고침</button><button id="shopRelicButton" type="button">무작위 유물 감정</button></div>
+            <p id="shopMessage" class="shop-message"></p>
+            <button id="nextFloorButton" class="next-floor-button">상인과 작별하고 다음 층으로 <span>➜</span></button>
+          </div>
         </div>
+      </div>
 
+      <footer class="stage-footer">
+        <div class="control-hint"><span class="keycap">W</span><span class="keycap">A</span><span class="keycap">S</span><span class="keycap">D</span><span>이동</span><i></i><span class="keycap wide">↑ ↓ ← →</span><span>공격</span></div>
+        <div id="message" class="message-ribbon">던전의 어둠 속으로 들어가세요.</div>
+        <div class="run-badge"><span class="run-pulse"></span> 탐험 진행 중</div>
+      </footer>
+    </main>
 
-        <div id="message">
-            WASD : 이동　방향키 : 검 휘두르기
+    <!-- RIGHT HUD -->
+    <aside class="right-rail">
+      <section class="panel depth-panel">
+        <div class="depth-heading"><div><span class="panel-subtitle">CURRENT DEPTH</span><strong>던전 지도</strong></div><span class="map-floor" id="mapFloor">01F</span></div>
+        <div class="mini-map" aria-label="던전 미니맵">
+          <svg viewBox="0 0 220 142" role="img" aria-label="연결된 던전 방 지도">
+            <g fill="#302440" stroke="#a88abd" stroke-width="2">
+              <path d="M89 53h35v20H89zM124 53h31v20h-31zM155 53h26v20h-26zM89 73h20v28H89zM109 91h34v20h-34zM143 91h28v20h-28zM155 31h26v22h-26zM72 31h17v22H72z"/>
+            </g>
+            <g fill="none" stroke="#806892" stroke-width="5" opacity=".85"><path d="M80 42h18v21h25M141 63h27M99 73v29h26M141 101h28M168 53V42"/></g>
+            <path d="M165 100l7 7-7 7-7-7z" fill="#ff587d" stroke="#ffc0d1" stroke-width="2"/>
+            <circle cx="165" cy="107" r="13" fill="none" stroke="#ff668d" stroke-width="2" opacity=".25"/>
+          </svg>
+          <div class="map-legend"><span><i class="legend-room"></i> 탐험한 방</span><span><i class="legend-player"></i> 현재 위치</span></div>
         </div>
+      </section>
 
+      <section class="panel pause-card">
+        <div class="pause-card-title"><span>✧</span><strong>모험 관리</strong><span>✧</span></div>
+        <div id="pauseIdle" class="pause-idle">
+          <p>잠시 숨을 고르시겠습니까?</p>
+          <button class="menu-action primary-action" onclick="openPauseMenu()"><b>Ⅱ</b> 일시 정지</button>
+          <button class="menu-action" onclick="openCodexMenu()"><b>♜</b> 도전과제 / 도감</button>
+        </div>
+        <div id="pauseOverlay" class="pause-overlay" style="display:none;">
+          <div class="pause-panel-inner">
+            <div class="pause-title">일시 정지</div>
+            <button class="menu-action primary-action" onclick="resumeGame()"><b>▶</b> 계속하기</button>
+            <button class="menu-action" onclick="toggleSoundSettings()"><b>⚙</b> 설정</button>
+            <button class="menu-action" onclick="openCodexMenu()"><b>🏆</b> 도전과제</button>
+            <button class="menu-action" onclick="returnToMainMenu()"><b>⌂</b> 메인 메뉴로</button>
+            <div id="soundControl" class="sound-control"><label for="soundVolume">효과음 볼륨</label><input id="soundVolume" type="range" min="0" max="100" value="50" oninput="setSoundVolume(this.value)"><span id="soundVolumeValue">50%</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel supply-panel">
+        <div class="panel-heading"><span class="heading-mark">✦</span><h2>탐험 보급품</h2><span class="panel-subtitle">SUPPLIES</span></div>
+        <div class="supply-grid">
+          <div class="supply-item"><span class="supply-icon flame">♨</span><strong>화염 기름</strong><small>화상 강화</small></div>
+          <div class="supply-item"><span class="supply-icon crystal">◆</span><strong>빙결 핵</strong><small>보스 피해</small></div>
+          <div class="supply-item"><span class="supply-icon book">▤</span><strong>마도서</strong><small>마력 증폭</small></div>
+          <div class="supply-item"><span class="supply-icon potion">⚗</span><strong>회복약</strong><small>체력 회복</small></div>
+        </div>
+        <div class="supply-note">상점은 3·8·13층 클리어 후 열립니다.</div>
+      </section>
+      <div class="right-footer"><span>BUILD 0.9.4</span><span>✦</span><span>DESCEND DEEPER</span></div>
+    </aside>
+  </div>
+
+  <!-- MAIN MENU -->
+  <div id="mainMenuOverlay" class="screen-overlay">
+    <div class="screen-box main-menu-box">
+      <div class="title-rune">✦</div><div class="menu-kicker">A PIXEL FANTASY ROGUELIKE</div>
+      <h1> DUNGEON <em>:</em> DESCENT </h1>
+      <p>깊은 던전으로 내려가 살아남으세요.</p>
+      <div class="menu-section-title">CHARACTER SELECT</div>
+      <div id="characterSelection" class="character-selection"></div>
+      <p id="selectedCharacterInfo" class="selected-character-info">캐릭터를 선택하세요.</p>
+      <div class="main-menu-actions"><button onclick="startGame()">던전 입장 <span>➜</span></button><button class="secondary-menu-button" onclick="openMetaMenu()">영구 강화 / 기록</button><button class="secondary-menu-button" onclick="openCodexMenu()">도감 / 업적</button></div>
+      <p id="mainMenuRecord" class="screen-hint">최고 기록을 불러오는 중...</p>
+      <p class="screen-hint">WASD 이동 · 방향키 공격 · ESC 일시정지</p>
     </div>
+  </div>
 
+  <!-- META MENU -->
+  <div id="metaOverlay" class="screen-overlay meta-overlay" style="display:none;"><div class="screen-box meta-box"><h1>✦ 영혼의 기록</h1><p>탐험에서 모은 영혼 파편으로 영구적인 힘을 개방하세요.</p><div id="metaSummary" class="meta-summary"></div><div id="metaUpgrades" class="meta-upgrades"></div><div id="metaUnlocks" class="meta-unlocks"></div><button class="secondary-menu-button" onclick="closeMetaMenu()">돌아가기</button></div></div>
 
-    <!-- 게임 오버 화면 -->
+  <!-- CODEX MENU -->
+  <div id="codexOverlay" class="screen-overlay codex-overlay" style="display:none;"><div class="screen-box codex-box"><h1>📖 탐험가의 도감</h1><p>던전에서 발견한 유물과 마주친 적, 달성한 업적을 기록합니다.</p><div id="codexContent" class="codex-content"></div><button class="secondary-menu-button" onclick="closeCodexMenu()">돌아가기</button></div></div>
 
-    <div id="gameOver">
+  <!-- GAME OVER -->
+  <div id="gameOver" class="screen-overlay" style="display:none;"><div id="gameOverBox" class="screen-box"><h1>☠ GAME OVER</h1><p id="result"></p><button onclick="restartGame()">다시 시작</button><button class="secondary-menu-button" onclick="returnToMainMenu()">메인 메뉴</button></div></div>
 
-        <div id="gameOverBox">
-
-            <h1>☠ GAME OVER</h1>
-
-            <p id="result"></p>
-
-            <button onclick="restartGame()">
-                다시 시작
-            </button>
-            <button class="secondary-menu-button" onclick="returnToMainMenu()">메인 메뉴</button>
-
-        </div>
-
-    </div>
-
-
-    <!-- 사운드 기능 -->
-    <script src="js/sound.js"></script>
-
-    <!-- 플레이어 기능 -->
-    <script src="js/player.js"></script>
-
-    <!-- 적 기능 -->
-    <script src="js/enemy.js"></script>
-
-    <!-- 효과 기능 -->
-    <script src="js/effects.js"></script>
-
-    <!-- 화면 그리기 기능 -->
-    <script src="js/render.js"></script>
-
-    <!-- 확장 콘텐츠 데이터 -->
-    <script src="js/content.js"></script>
-
-    <!-- 영구 성장 / 캐릭터 해금 -->
-    <script src="js/progression.js"></script>
-
-    <!-- 게임 전체 진행 관리: 반드시 마지막 -->
-    <script src="js/game.js"></script>
-
+  <script src="js/sound.js"></script>
+  <script src="js/player.js"></script>
+  <script src="js/enemy.js"></script>
+  <script src="js/effects.js"></script>
+  <script src="js/render.js"></script>
+  <script src="js/content.js"></script>
+  <script src="js/progression.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/ui-theme.js"></script>
 </body>
-
 </html>

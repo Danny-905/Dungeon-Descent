@@ -59,8 +59,17 @@ function draw() {
 
   for (let x = 0; x < canvas.width; x += TILE) {
     for (let y = 0; y < canvas.height; y += TILE) {
+      const tileShade = ((x / TILE + y / TILE) % 2 === 0) ? 0.045 : 0.0;
+      ctx.fillStyle = biome.id === "crypt" ? `rgba(105,75,125,${tileShade})` : `rgba(255,255,255,${tileShade})`;
+      ctx.fillRect(x + 1, y + 1, TILE - 2, TILE - 2);
       ctx.strokeStyle = biome.grid;
+      ctx.lineWidth = 1.2;
       ctx.strokeRect(x, y, TILE, TILE);
+      const crackSeed = (x / TILE * 13 + y / TILE * 7 + floor * 3) % 19;
+      if (crackSeed === 2 || crackSeed === 11) {
+        ctx.strokeStyle = "rgba(5,3,11,0.38)"; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(x + 8, y + 8); ctx.lineTo(x + 14, y + 15); ctx.lineTo(x + 12, y + 22); ctx.stroke();
+      }
 
       // 층 번호와 타일 좌표를 이용한 고정 장식 패턴
       const seed = (x / TILE * 17 + y / TILE * 31 + floor * 13) % 11;
@@ -84,6 +93,34 @@ function draw() {
       }
     }
   }
+
+  // ====================================
+  // 던전 조명과 바닥 장식
+  const ambient = ctx.createRadialGradient(canvas.width * 0.5, canvas.height * 0.48, 55, canvas.width * 0.5, canvas.height * 0.48, 440);
+  ambient.addColorStop(0, "rgba(151,91,195,0.12)");
+  ambient.addColorStop(0.68, "rgba(53,30,75,0.08)");
+  ambient.addColorStop(1, "rgba(3,2,9,0.78)");
+  ctx.fillStyle = ambient; ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.save(); ctx.translate(canvas.width / 2, canvas.height / 2);
+  ctx.globalAlpha = 0.13; ctx.strokeStyle = biome.id === "frost" ? "#8edaff" : biome.id === "ember" ? "#ff9b65" : "#c48be8"; ctx.lineWidth = 4;
+  for (let r = 1; r <= 3; r++) { ctx.beginPath(); ctx.arc(0, 0, 42 * r, 0, Math.PI * 2); ctx.stroke(); }
+  ctx.beginPath(); ctx.moveTo(-142, 0); ctx.lineTo(142, 0); ctx.moveTo(0, -112); ctx.lineTo(0, 112); ctx.stroke();
+  ctx.rotate(Math.PI / 4); ctx.strokeRect(-100, -100, 200, 200); ctx.restore();
+
+  // 가장자리의 마법 화로와 보라색 조명
+  [[34, 90], [canvas.width - 34, 90], [34, canvas.height - 82], [canvas.width - 34, canvas.height - 82]].forEach(([tx, ty], index) => {
+    const glow = ctx.createRadialGradient(tx, ty, 2, tx, ty, 58);
+    glow.addColorStop(0, "rgba(220,119,255,0.38)"); glow.addColorStop(1, "rgba(142,54,214,0)");
+    ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(tx, ty, 58, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#30203b"; ctx.fillRect(tx - 9, ty + 9, 18, 22);
+    ctx.strokeStyle = "#8b6b9d"; ctx.lineWidth = 2; ctx.strokeRect(tx - 9, ty + 9, 18, 22);
+    ctx.save(); ctx.shadowBlur = 18; ctx.shadowColor = "#c55cff"; ctx.fillStyle = index % 2 ? "#dc9cff" : "#bd65ff";
+    ctx.beginPath(); ctx.moveTo(tx, ty - 17); ctx.quadraticCurveTo(tx + 15, ty - 2, tx, ty + 8); ctx.quadraticCurveTo(tx - 12, ty - 1, tx, ty - 17); ctx.fill(); ctx.restore();
+  });
+
+  ctx.fillStyle = "rgba(5,3,10,0.58)"; ctx.fillRect(0, 0, canvas.width, 16); ctx.fillRect(0, canvas.height - 16, canvas.width, 16); ctx.fillRect(0, 0, 16, canvas.height); ctx.fillRect(canvas.width - 16, 0, 16, canvas.height);
+  ctx.strokeStyle = "rgba(145,112,162,0.48)"; ctx.lineWidth = 3; ctx.strokeRect(7, 7, canvas.width - 14, canvas.height - 14);
 
   // ====================================
   // 보스별 공격 경고 영역
@@ -245,7 +282,7 @@ function draw() {
     const animationClock = gamePaused ? 0 : Date.now();
     const spriteFrame = Math.floor(animationClock / (enemy.isBoss ? 210 : 145)) % 4;
     const spriteKey = enemy.isBoss ? `boss_${enemy.bossElement === "fire" ? "ember" : enemy.bossElement === "frost" ? "frost" : enemy.bossElement === "poison" ? "plague" : "crypt"}` : `enemy_${enemy.archetypeId || "ghoul"}`;
-    const spriteSize = enemy.isBoss ? enemy.size * 1.55 : enemy.size * 1.65;
+    const spriteSize = enemy.isBoss ? enemy.size * 1.8 : enemy.size * 1.9;
     const facingLeft = (enemy.x > player.x);
     const rendered = drawPixelSprite(spriteKey, spriteFrame, enemyX - spriteSize / 2, enemyY - spriteSize / 2, spriteSize, spriteSize, facingLeft);
     if (!rendered) {
@@ -293,7 +330,7 @@ function draw() {
   if (player.invincible % 10 < 5) {
     const animationClock = gamePaused ? 0 : Date.now();
     const spriteFrame = player.moving ? Math.floor(animationClock / 115) % 4 : (player.attacking ? 2 : 0);
-    const playerSpriteSize = 48;
+    const playerSpriteSize = 64;
     const spriteKey = `player_${player.characterId || "knight"}`;
     const rendered = drawPixelSprite(spriteKey, spriteFrame, player.x - playerSpriteSize / 2, player.y - playerSpriteSize / 2, playerSpriteSize, playerSpriteSize, player.facing === "left");
     if (!rendered) {

@@ -161,14 +161,14 @@ let shopRerollCount = 0;
 
 // 보스 처치 후 아직 보유하지 않은 유물 중 3개를 제시합니다.
 const baseRelics = [
-  { id: "feather", name: "질풍의 깃털", icon: "🪶", image: "images/01_질풍의_깃털.png", rarity: "일반", tags: ["speed", "wind"], description: "공격 속도 +12%", apply() { player.attackSpeedMultiplier *= 1.12; } },
-  { id: "heart", name: "생명의 심장", icon: "❤️", image: "images/02_생명의_심장.png", rarity: "일반", tags: ["life", "defense"], description: "최대 체력 +35", apply() { player.maxHp += 35; player.hp = Math.min(player.maxHp, player.hp + 35); } },
-  { id: "rune", name: "파멸의 룬", icon: "🔮", image: "images/03_파멸의_룬.png", rarity: "희귀", tags: ["arcane", "damage"], description: "최종 대미지 +8%", apply() { player.finalDamageMultiplier *= 1.08; } },
-  { id: "triple", name: "삼중의 맹격", icon: "⚔️", image: "images/04_삼중의_맹격.png", rarity: "희귀", tags: ["physical", "speed"], description: "3번째 타격 대미지 +35%", apply() { player.thirdHitBonus += 0.35; } },
-  { id: "wind", name: "바람의 발걸음", icon: "👟", image: "images/05_바람의_발걸음.png", rarity: "일반", tags: ["speed", "wind"], description: "이동 속도 +0.15", apply() { player.speed += 0.15; } },
-  { id: "eye", name: "확장의 눈", icon: "👁️", image: "images/06_확장의_눈.png", rarity: "일반", tags: ["range", "physical"], description: "공격 범위 +15%", apply() { player.attackRange *= 1.15; } },
-  { id: "hourglass", name: "성장의 모래시계", icon: "⌛", image: "images/07_성장의_모래시계.png", rarity: "희귀", tags: ["growth", "gold"], description: "층마다 대미지 +1, 최대 체력 +4", apply() { player.hourglass = true; }, onFloor() { player.damage += 1; player.maxHp += 4; } },
-  { id: "guardian", name: "철벽의 수호자", icon: "🛡️", image: "images/08_철벽의 수호자.png", rarity: "일반", tags: ["defense", "life"], description: "방어력 +7", apply() { player.defense += 7; } },
+  { id: "feather", name: "질풍의 깃털", icon: "🪶", image: "images/relics/gust_feather.png", rarity: "일반", tags: ["speed", "wind"], description: "공격 속도 +12%", apply() { player.attackSpeedMultiplier *= 1.12; } },
+  { id: "heart", name: "생명의 심장", icon: "❤️", image: "images/relics/life_heart.png", rarity: "일반", tags: ["life", "defense"], description: "최대 체력 +35", apply() { player.maxHp += 35; player.hp = Math.min(player.maxHp, player.hp + 35); } },
+  { id: "rune", name: "파멸의 룬", icon: "🔮", image: "images/relics/ruin_rune.png", rarity: "희귀", tags: ["arcane", "damage"], description: "최종 대미지 +8%", apply() { player.finalDamageMultiplier *= 1.08; } },
+  { id: "triple", name: "삼중의 맹격", icon: "⚔️", image: "images/relics/triple_strike.png", rarity: "희귀", tags: ["physical", "speed"], description: "3번째 타격 대미지 +35%", apply() { player.thirdHitBonus += 0.35; } },
+  { id: "wind", name: "바람의 발걸음", icon: "👟", image: "images/relics/windstep_boots.png", rarity: "일반", tags: ["speed", "wind"], description: "이동 속도 +0.15", apply() { player.speed += 0.15; } },
+  { id: "eye", name: "확장의 눈", icon: "👁️", image: "images/relics/expansion_eye.png", rarity: "일반", tags: ["range", "physical"], description: "공격 범위 +15%", apply() { player.attackRange *= 1.15; } },
+  { id: "hourglass", name: "성장의 모래시계", icon: "⌛", image: "images/relics/growth_hourglass.png", rarity: "희귀", tags: ["growth", "gold"], description: "층마다 대미지 +1, 최대 체력 +4", apply() { player.hourglass = true; }, onFloor() { player.damage += 1; player.maxHp += 4; } },
+  { id: "guardian", name: "철벽의 수호자", icon: "🛡️", image: "images/relics/iron_guardian.png", rarity: "일반", tags: ["defense", "life"], description: "방어력 +7", apply() { player.defense += 7; } },
 ];
 
 const relics = [...baseRelics, ...EXTRA_RELICS];
@@ -260,6 +260,8 @@ function startGame() {
   closeCodexMenu();
   mainMenuOverlay.style.display = "none";
   pauseOverlay.style.display = "none";
+  const idle = document.getElementById("pauseIdle");
+  if (idle) idle.style.display = "block";
   restartGame();
 }
 
@@ -276,6 +278,8 @@ function returnToMainMenu() {
   closeCodexMenu();
   document.getElementById("gameOver").style.display = "none";
   pauseOverlay.style.display = "none";
+  const idle = document.getElementById("pauseIdle");
+  if (idle) idle.style.display = "block";
   mainMenuOverlay.style.display = "flex";
   renderCharacterSelection();
 }
@@ -284,6 +288,8 @@ function resumeGame() {
   gamePaused = false;
   gameRunning = true;
   pauseOverlay.style.display = "none";
+  const idle = document.getElementById("pauseIdle");
+  if (idle) idle.style.display = "block";
 }
 
 document.addEventListener("keydown", function (e) {
@@ -298,9 +304,7 @@ document.addEventListener("keydown", function (e) {
   if (gamePaused) {
     resumeGame();
   } else if (gameRunning) {
-    gamePaused = true;
-    gameRunning = false;
-    pauseOverlay.style.display = "flex";
+    openPauseMenu();
   }
 });
 
@@ -895,16 +899,34 @@ function updateUI() {
     if (element) element.textContent = value;
   });
 
-  document.getElementById("floor").textContent = `🏰 Floor: ${floor}`;
+  document.getElementById("floor").textContent = `지하 ${floor}층`;
+  const mapFloor = document.getElementById("mapFloor");
+  if (mapFloor) mapFloor.textContent = `${String(floor).padStart(2, "0")}F`;
+  const portrait = document.getElementById("heroPortrait");
+  if (portrait) portrait.src = `images/characters/${player.characterId || "knight"}.png`;
+  const heroName = document.getElementById("heroName");
+  if (heroName && typeof CHARACTERS !== "undefined") {
+    const selected = CHARACTERS.find((character) => character.id === player.characterId);
+    if (selected) heroName.textContent = selected.name;
+  }
+  const heartDisplay = document.getElementById("heartDisplay");
+  if (heartDisplay) {
+    const heartCount = Math.max(4, Math.min(8, Math.ceil(player.maxHp / 25)));
+    const filledHearts = Math.max(0, Math.ceil((player.hp / player.maxHp) * heartCount));
+    const heartMarkup = Array.from({ length: heartCount }, (_, index) => `<span class="${index < filledHearts ? "heart-on" : "heart-off"}">♥</span>`).join("");
+    if (heartDisplay.dataset.markup !== heartMarkup) { heartDisplay.innerHTML = heartMarkup; heartDisplay.dataset.markup = heartMarkup; }
+  }
+  const relicCount = document.getElementById("relicCount");
+  if (relicCount) relicCount.textContent = `${ownedRelics.length} / ${relics.length}`;
   const biomeElement = document.getElementById("biomeName");
   if (biomeElement) biomeElement.textContent = getCurrentBiome().name;
 
-  document.getElementById("gold").textContent = `💰 Gold: ${gold}`;
+  document.getElementById("gold").textContent = `🪙 ${gold}`;
 
-  document.getElementById("kills").textContent = `☠ Kills: ${kills}`;
+  document.getElementById("kills").textContent = `☠ ${kills}`;
   const levelElement = document.getElementById("level");
   if (levelElement) {
-    levelElement.textContent = `⭐ Lv. ${level}`;
+    levelElement.textContent = `Lv. ${level}`;
   }
 
   // 경험치 바: 현재 레벨에서 다음 레벨까지의 경험치 비율 표시

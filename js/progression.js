@@ -244,7 +244,7 @@ function renderCodexMenu() {
     const found = metaProgress.discoveredEvents.includes(item.id);
     return `<div class="codex-entry ${found ? "found" : "unknown"}"><span>${found ? item.icon : "?"}</span><strong>${found ? item.name : "미확인 사건"}</strong><small>${found ? item.detail : "미발견"}</small></div>`;
   }).join("")}</div></section>`);
-  sections.push(`<section class="codex-section"><h3>업적 (${metaProgress.unlockedAchievements.length}/${META_ACHIEVEMENTS.length})</h3><div class="achievement-list">${META_ACHIEVEMENTS.map((item) => {
+  sections.push(`<section class="codex-section achievement-section"><h3>업적 (${metaProgress.unlockedAchievements.length}/${META_ACHIEVEMENTS.length})</h3><div class="achievement-list">${META_ACHIEVEMENTS.map((item) => {
     const found = metaProgress.unlockedAchievements.includes(item.id);
     return `<div class="achievement-entry ${found ? "unlocked" : ""}"><span>${found ? "🏆" : "🔒"}</span><div><strong>${item.name}</strong><small>${item.description}</small></div><em>${found ? "달성" : `보상 ${item.reward} 파편`}</em></div>`;
   }).join("")}</div></section>`);
